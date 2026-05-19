@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APONWAONET // Auditoría de Vulnerabilidad Energética</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js for Client-Side PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#060a08',
+                        darkCard: '#0d1411',
+                        darkBorder: '#16251f',
+                        aponwaoBlue: '#0062b8',
+                        aponwaoGreen: '#009a44',
+                        aponwaoTeal: '#008282',
+                        neonRed: '#ff3e3e',
+                        bleedOrange: '#f59e0b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #060a08;
+            color: #e2e8f0;
+        }
+        /* Custom Glowing Accents using Brand Colors */
+        .brand-glow-blue {
+            text-shadow: 0 0 10px rgba(0, 98, 184, 0.6);
+        }
+        .brand-glow-green {
+            text-shadow: 0 0 10px rgba(0, 154, 68, 0.6);
+        }
+        .brand-border-glow {
+            box-shadow: 0 0 15px rgba(0, 98, 184, 0.15);
+        }
+        .pulse-bleed {
+            animation: pulse-brand-red 2s infinite;
+        }
+        @keyframes pulse-brand-red {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(255, 62, 62, 0.15);
+                border-color: rgba(255, 62, 62, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(255, 62, 62, 0.4);
+                border-color: rgba(255, 62, 62, 0.7);
+            }
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 overflow-x-hidden">
+
+    <!-- Navigation Header with Brand Logo and Identity -->
+    <header class="border-b border-darkBorder bg-darkCard/80 backdrop-blur sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- SVG Vector representation of APONWAONET logo for precise branding -->
+                <div class="bg-aponwaoBlue/10 border border-aponwaoBlue/30 p-2 rounded-xl flex items-center justify-center">
+                    <svg class="w-8 h-8" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Icon representing the wireless/energy curves of APONWAONET -->
+                        <path d="M20 70C25 55 40 40 55 35" stroke="#0062b8" stroke-width="8" stroke-linecap="round"/>
+                        <path d="M40 80C48 68 62 55 78 50" stroke="#008282" stroke-width="8" stroke-linecap="round"/>
+                        <path d="M60 90C68 82 82 72 95 68" stroke="#009a44" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="20" cy="80" r="10" fill="#0062b8" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-md font-black tracking-wider text-white flex items-center gap-1.5">
+                        APONWAO<span class="text-aponwaoGreen">NET</span>
+                        <span class="text-[9px] bg-aponwaoBlue/20 text-aponwaoBlue border border-aponwaoBlue/30 px-2 py-0.5 rounded-full font-bold">2026</span>
+                    </h1>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest font-semibold">Consultoría Energética & Conectividad Industrial</p>
+                </div>
+            </div>
+            <div class="text-right hidden sm:block">
+                <span class="text-xs text-white font-semibold border border-darkBorder bg-darkBg px-3 py-1.5 rounded-full inline-flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-aponwaoGreen animate-pulse"></span> B2B Premium Tool
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+        
+        <!-- Left Column: Inputs Form -->
+        <section class="lg:col-span-5 space-y-6">
+            <!-- Informacion de Auditoria Box -->
+            <div class="bg-darkCard border border-darkBorder rounded-2xl p-5 shadow-2xl">
+                <h2 class="text-xs font-bold tracking-wider text-gray-300 uppercase mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-file-contract text-aponwaoBlue"></i> Metadatos de la Empresa Auditada
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] text-gray-400 block mb-1">Nombre de la Planta</label>
+                        <input type="text" id="companyName" value="Industrial Láctea del Sur C.A." class="w-full bg-darkBg border border-darkBorder rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 block mb-1">RIF / Registro</label>
+                        <input type="text" id="companyRIF" value="J-50010966-0" class="w-full bg-darkBg border border-darkBorder rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inputs Box -->
+            <div class="bg-darkCard border border-darkBorder rounded-2xl p-5 shadow-2xl space-y-5">
+                <div class="flex items-center justify-between border-b border-darkBorder pb-3">
+                    <h2 class="text-xs font-black tracking-wider text-aponwaoGreen uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-sliders"></i> Variables de Medición en Campo
+                    </h2>
+                    <span class="text-[9px] text-gray-400">Mensual</span>
+                </div>
+
+                <!-- Input Subsections -->
+                <div class="space-y-4">
+                    <!-- Corpoelec Sub-block -->
+                    <div class="p-3 bg-darkBg/60 rounded-xl border border-darkBorder/60 space-y-3">
+                        <h3 class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-aponwaoBlue"></span> Eléctrico (Factura Corpoelec)
+                        </h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="text-[9px] text-gray-400 block mb-1">Monto Total ($)</label>
+                                <input type="number" id="corpoelecBill" value="4200" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[9px] text-gray-400 block mb-1">Activa (kWh)</label>
+                                <input type="number" id="activeEnergy" value="48000" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[9px] text-gray-400 block mb-1">Reactiva (kVArh)</label>
+                                <input type="number" id="reactiveEnergy" value="34000" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diesel Informal Sub-block -->
+                    <div class="p-3 bg-darkBg/60 rounded-xl border border-darkBorder/60 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-aponwaoTeal"></span> Combustible Diésel Informal
+                            </h3>
+                            <span class="text-[8px] bg-red-950 text-neonRed border border-neonRed/30 px-1.5 py-0.5 rounded font-black uppercase">Prov. 0071</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[9px] text-gray-400 block mb-1">Litros Comprados</label>
+                                <input type="number" id="dieselLiters" value="2500" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[9px] text-gray-400 block mb-1">Precio por Litro ($)</label>
+                                <input type="number" id="dieselPrice" value="0.90" step="0.01" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lucro Cesante Sub-block -->
+                    <div class="p-3 bg-darkBg/60 rounded-xl border border-darkBorder/60 space-y-3">
+                        <h3 class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neonRed"></span> Pérdida Operativa (COVENIN 159)
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[9px] text-gray-400 block mb-1">Horas Parada / Mes</label>
+                                <input type="number" id="outageHours" value="15" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[9px] text-gray-400 block mb-1">Margen Ganancia/u ($)</label>
+                                <input type="number" id="unitMargin" value="1.50" step="0.05" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                            </div>
+                            <div class="col-span-2 grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-gray-400 block mb-1">Unidades Producidas / Hora</label>
+                                    <input type="number" id="unitsPerHour" value="500" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-gray-400 block mb-1">Costo Merma Física ($)</label>
+                                    <input type="number" id="lossSpoilage" value="2000" class="w-full bg-darkBg border border-darkBorder rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-aponwaoBlue transition-all">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="calculateAuditMetrics()" class="w-full bg-aponwaoBlue hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-aponwaoBlue/20 flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-calculator"></i> Actualizar Diagnóstico de Campo
+                </button>
+            </div>
+        </section>
+
+        <!-- Right Column: Real-Time Dashboard -->
+        <section class="lg:col-span-7 space-y-6">
+            
+            <!-- HEMORRAGIA DE CAJA Card -->
+            <div class="bg-darkCard border border-neonRed/30 pulse-bleed rounded-3xl p-6 relative overflow-hidden">
+                <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-neonRed/5 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-3 w-3 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-neonRed opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-neonRed"></span>
+                        </span>
+                        <h2 class="text-[10px] font-black uppercase tracking-widest text-neonRed">Peligro Operacional Detectado</h2>
+                    </div>
+                    <span class="text-[9px] text-gray-400 font-mono" id="auditTimestamp"></span>
+                </div>
+                
+                <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none uppercase">
+                    Hemorragia de Caja Mensual
+                </h1>
+                <p class="text-[11px] text-gray-400 mt-1">Suma consolidada de ineficiencia por multas de red, fugas fiscales por diésel y lucro cesante industrial.</p>
+
+                <div class="mt-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-t border-darkBorder/60 pt-4">
+                    <div>
+                        <span class="text-4xl sm:text-5xl font-black text-white tracking-tighter" id="totalBleedAmount">$0.00</span>
+                        <span class="text-[11px] font-semibold text-neonRed block mt-1" id="totalBleedPercent">0% del gasto energético total.</span>
+                    </div>
+                    <div class="bg-neonRed/5 border border-neonRed/10 rounded-xl px-4 py-2 text-right">
+                        <span class="text-[9px] text-gray-400 uppercase font-bold tracking-wider block">Fuga Semestral Proyectada</span>
+                        <span class="text-lg font-bold text-neonRed font-mono" id="halfYearBleed">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Cards Grid with APONWAONET Palette -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Power Factor Card -->
+                <div class="bg-darkCard border border-darkBorder rounded-2xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Factor de Potencia</span>
+                            <i class="fa-solid fa-bolt text-aponwaoBlue"></i>
+                        </div>
+                        <span class="text-2xl font-black text-white font-mono" id="valFP">0.000</span>
+                    </div>
+                    <div class="mt-4 border-t border-darkBorder pt-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400 text-[11px]">Recargo:</span>
+                            <span class="font-bold text-neonRed font-mono" id="valCorpoelecPenalty">$0.00</span>
+                        </div>
+                        <span class="text-[9px] text-gray-500 font-medium block" id="valPenaltyPercent">(Recargo del 0%)</span>
+                    </div>
+                </div>
+
+                <!-- Fiscal Bleed Card -->
+                <div class="bg-darkCard border border-darkBorder rounded-2xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Impacto Prov. 0071</span>
+                            <i class="fa-solid fa-scale-unbalanced text-aponwaoTeal"></i>
+                        </div>
+                        <span class="text-2xl font-black text-white font-mono" id="valDieselCost">$0.00</span>
+                    </div>
+                    <div class="mt-4 border-t border-darkBorder pt-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400 text-[11px]">Pérdida ISLR:</span>
+                            <span class="font-bold text-neonRed font-mono" id="valTaxLoss">$0.00</span>
+                        </div>
+                        <span class="text-[9px] text-gray-500 font-medium block">No deducible (Tasa 34%)</span>
+                    </div>
+                </div>
+
+                <!-- Lucro Cesante Card -->
+                <div class="bg-darkCard border border-darkBorder rounded-2xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lucro Cesante</span>
+                            <i class="fa-solid fa-industry text-aponwaoGreen"></i>
+                        </div>
+                        <span class="text-2xl font-black text-white font-mono" id="valLucroCesante">$0.00</span>
+                    </div>
+                    <div class="mt-4 border-t border-darkBorder pt-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400 text-[11px]">Merma Física:</span>
+                            <span class="font-bold text-gray-300 font-mono" id="valLossSpoilage">$0.00</span>
+                        </div>
+                        <span class="text-[9px] text-gray-500 font-medium block" id="valLossHours">0 horas de paro</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Container -->
+            <div class="bg-darkCard border border-darkBorder rounded-3xl p-5 shadow-2xl">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-bar text-aponwaoGreen"></i> Distribución Financiera: Gasto Útil vs. Fugas Estructurales
+                </h3>
+                <div class="h-64">
+                    <canvas id="auditBarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Action Buttons Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button onclick="generateWhatsAppReport()" class="w-full bg-[#25D366] hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-green-900/10 flex items-center justify-center gap-2.5 text-xs uppercase tracking-wide">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Alerta WhatsApp Ejecutivo
+                </button>
+                <button onclick="generateProfessionalPDF()" class="w-full bg-darkBg hover:bg-darkCard text-white border border-aponwaoBlue hover:border-blue-500 hover:brand-border-glow font-bold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2.5 text-xs uppercase tracking-wide">
+                    <i class="fa-solid fa-file-pdf text-aponwaoBlue text-lg"></i> Exportar Informe de Hallazgos PDF
+                </button>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Safely Hidden PDF Template (Using standard fixed position with z-index and native fonts for maximum rendering compatibility) -->
+    <div id="pdfWrapper" style="position: fixed; left: -9999px; top: -9999px; width: 0; height: 0; overflow: hidden; z-index: -100;">
+        <div id="pdfTemplate" class="text-slate-800 bg-white p-12 leading-relaxed" style="width: 800px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+            
+            <!-- Header of PDF with Brand Representation -->
+            <div class="flex items-center justify-between border-b-4 border-slate-900 pb-6 mb-6">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-10 h-10" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 70C25 55 40 40 55 35" stroke="#0062b8" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M40 80C48 68 62 55 78 50" stroke="#008282" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M60 90C68 82 82 72 95 68" stroke="#009a44" stroke-width="8" stroke-linecap="round"/>
+                            <circle cx="20" cy="80" r="10" fill="#0062b8" />
+                        </svg>
+                        <div>
+                            <h1 class="text-xl font-black tracking-wider text-slate-900 leading-none">
+                                APONWAO<span class="text-[#009a44]">NET</span>
+                            </h1>
+                            <span class="text-[8px] text-gray-500 uppercase tracking-widest font-bold">Rif: J500109660 // Aponwaonet C.A.</span>
+                        </div>
+                    </div>
+                    <h2 class="text-sm font-extrabold tracking-tight text-[#0062b8] uppercase">Informe de Hallazgos Energéticos & Plan de Mitigación</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-800 font-bold block" id="pdfReportId">ID: AP-9921-2026</span>
+                    <span class="text-[9px] text-slate-500 font-mono block mt-1" id="pdfDate"></span>
+                </div>
+            </div>
+
+            <!-- Meta Grid -->
+            <div class="grid grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block">Empresa Auditada</span>
+                    <span class="text-sm font-black text-slate-800" id="pdfCompanyName"></span>
+                    <span class="text-xs text-slate-500 block" id="pdfCompanyRIF"></span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block">Metodología Aplicada</span>
+                    <span class="text-xs text-slate-800 block font-semibold">Providencia Fiscal 0071 / COVENIN 159</span>
+                    <span class="text-[9px] text-slate-500 block font-medium">Venezuela 2026 - Mercado Eléctrico</span>
+                </div>
+            </div>
+
+            <!-- Main Risk Statement -->
+            <div class="border-l-4 border-red-500 bg-red-50 p-5 rounded-r-xl mb-6">
+                <span class="text-[10px] font-black text-red-700 uppercase tracking-widest block">Peligro de Fuga Operacional</span>
+                <h3 class="text-lg font-bold text-slate-900 mt-1">Diagnóstico Crítico: Hemorragia de Caja Mensual</h3>
+                <div class="flex items-baseline gap-4 mt-2">
+                    <span class="text-3xl font-black text-red-600 tracking-tight" id="pdfTotalBleed">$0.00</span>
+                    <span class="text-xs text-red-800 font-bold" id="pdfAnnualBleed">Proyección Anualizada: $0.00 / año</span>
+                </div>
+            </div>
+
+            <!-- Detailed Breakdown -->
+            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-3">Auditoría de Hallazgos Encontrados</h4>
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="border border-slate-200 p-3 rounded-xl bg-slate-50/50">
+                    <span class="text-[9px] text-slate-500 uppercase font-extrabold tracking-widest block">Factor de Potencia</span>
+                    <span class="text-md font-black text-slate-800 block mt-1" id="pdfValFP">0.00</span>
+                    <div class="mt-2 border-t border-slate-200/60 pt-1 flex justify-between text-[10px] text-slate-700">
+                        <span>Multa estimada:</span>
+                        <strong class="text-red-600 font-bold" id="pdfValMulta"></strong>
+                    </div>
+                </div>
+                <div class="border border-slate-200 p-3 rounded-xl bg-slate-50/50">
+                    <span class="text-[9px] text-slate-500 uppercase font-extrabold tracking-widest block">Gasto de Combustible</span>
+                    <span class="text-md font-black text-slate-800 block mt-1" id="pdfValCombustible"></span>
+                    <div class="mt-2 border-t border-slate-200/60 pt-1 flex justify-between text-[10px] text-slate-700">
+                        <span>Pérdida ISLR:</span>
+                        <strong class="text-red-600 font-bold" id="pdfValTaxLoss"></strong>
+                    </div>
+                </div>
+                <div class="border border-slate-200 p-3 rounded-xl bg-slate-50/50">
+                    <span class="text-[9px] text-slate-500 uppercase font-extrabold tracking-widest block">Lucro Cesante</span>
+                    <span class="text-md font-black text-slate-800 block mt-1" id="pdfValLucro"></span>
+                    <div class="mt-2 border-t border-slate-200/60 pt-1 flex justify-between text-[10px] text-slate-700">
+                        <span>Tiempo de Parada:</span>
+                        <strong class="text-slate-800 font-bold" id="pdfValHours"></strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROI & Technical Intervention Plan (3 Fases) -->
+            <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest border-b-2 border-slate-900 pb-2 mb-4">Hoja de Ruta de Ingeniería & ROI (3 Fases APONWAONET)</h4>
+            
+            <div class="space-y-4">
+                <!-- Phase 1 -->
+                <div class="flex gap-4">
+                    <div class="flex-none w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-extrabold flex items-center justify-center text-xs">1</div>
+                    <div>
+                        <h5 class="font-bold text-slate-900 text-xs">Fase 1: Corrección de Factor de Potencia (Retorno Inmediato)</h5>
+                        <p class="text-[10px] text-slate-600 mt-1">
+                            Instalación de un Banco de Condensadores automáticos sintonizados para estabilizar el FP por encima de 0.90. **Inversión Estimada: $2,000 - $4,000**. El retorno de la inversión es inmediato al eliminar el 100% de la penalización en la factura mensual de Corpoelec.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="flex gap-4">
+                    <div class="flex-none w-8 h-8 rounded-full bg-teal-100 text-teal-800 font-extrabold flex items-center justify-center text-xs">2</div>
+                    <div>
+                        <h5 class="font-bold text-slate-900 text-xs">Fase 2: Formalización Fiscal & Respaldo Crítico Automático</h5>
+                        <p class="text-[10px] text-slate-600 mt-1">
+                            Sustitución de compra de diésel informal mediante contratos formales de suministro de combustible que cuenten con factura legal bajo Providencia 0071. Implementación de sistemas de transferencia automática ATS conformes con COVENIN para reducir el Lucro Cesante a cero al arrancar los sistemas en menos de 10 segundos.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="flex gap-4">
+                    <div class="flex-none w-8 h-8 rounded-full bg-green-100 text-green-800 font-extrabold flex items-center justify-center text-xs">3</div>
+                    <div>
+                        <h5 class="font-bold text-slate-900 text-xs">Fase 3: Transición a Autogeneración Híbrida Solar Inteligente</h5>
+                        <p class="text-[10px] text-slate-600 mt-1">
+                            Integración de matriz solar fotovoltaica con almacenamiento modular de baterías de litio de calidad industrial. Esta micro-red optimizada por APONWAONET proporciona inmunidad tarifaria total frente al mercado energético de 2026, convirtiendo el costo energético residual en un activo rentable.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Audit Stamp -->
+            <div class="mt-12 pt-8 border-t border-slate-200 flex justify-between items-center text-[9px] text-slate-400 font-bold uppercase">
+                <span>Aponwaonet C.A. - División de Automatización & Energía B2B</span>
+                <span>Estudio Técnico de Vulnerabilidad</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert / Toast Message Overlay -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 z-50 bg-aponwaoBlue text-white py-3 px-5 rounded-2xl shadow-2xl font-bold text-sm transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-aponwaoGreen"></i> <span id="toastText">Operación exitosa</span>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        let auditChartObj = null;
+
+        window.onload = function() {
+            calculateAuditMetrics();
+        };
+
+        function formatCurrency(val) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const text = document.getElementById('toastText');
+            text.innerText = message;
+            if (isError) {
+                toast.classList.remove('bg-aponwaoBlue', 'text-white');
+                toast.classList.add('bg-neonRed', 'text-white');
+            } else {
+                toast.classList.remove('bg-neonRed', 'text-white');
+                toast.classList.add('bg-darkCard', 'text-white', 'border', 'border-darkBorder');
+            }
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
+        }
+
+        function calculateAuditMetrics() {
+            // Get inputs
+            const corpoelecBill = parseFloat(document.getElementById('corpoelecBill').value) || 0;
+            const activeEnergy = parseFloat(document.getElementById('activeEnergy').value) || 0;
+            const reactiveEnergy = parseFloat(document.getElementById('reactiveEnergy').value) || 0;
+            const dieselLiters = parseFloat(document.getElementById('dieselLiters').value) || 0;
+            const dieselPrice = parseFloat(document.getElementById('dieselPrice').value) || 0;
+            const outageHours = parseFloat(document.getElementById('outageHours').value) || 0;
+            const unitMargin = parseFloat(document.getElementById('unitMargin').value) || 0;
+            const unitsPerHour = parseFloat(document.getElementById('unitsPerHour').value) || 0;
+            const lossSpoilage = parseFloat(document.getElementById('lossSpoilage').value) || 0;
+
+            // Calculate Power Factor (FP) = cos(arctan(reactive/active))
+            let powerFactor = 1;
+            if (activeEnergy > 0) {
+                powerFactor = Math.cos(Math.atan(reactiveEnergy / activeEnergy));
+            } else if (reactiveEnergy > 0) {
+                powerFactor = 0;
+            }
+            
+            // FP penalty according to Venezuelan power utility norms
+            let penaltyPercent = 0;
+            let corpoelecPenaltyUSD = 0;
+            if (powerFactor < 0.90 && powerFactor >= 0) {
+                penaltyPercent = ((0.90 / powerFactor) - 1) * 100;
+                corpoelecPenaltyUSD = corpoelecBill * (penaltyPercent / 100);
+            }
+
+            // Calculate Diesel and Providencia 0071 Impact (ISLR rate is 34%)
+            const totalDieselCost = dieselLiters * dieselPrice;
+            const nonDeductibleTaxLoss = totalDieselCost * 0.34;
+
+            // Calculate Lucro Cesante (COVENIN 159 outage logs)
+            const unitsLost = outageHours * unitsPerHour;
+            const lossProductiveEarnings = unitsLost * unitMargin;
+            const totalLucroCesante = lossProductiveEarnings + lossSpoilage;
+
+            // Calculate Total Cash Bleed / Hemorragia de caja
+            const totalBleed = corpoelecPenaltyUSD + nonDeductibleTaxLoss + totalLucroCesante;
+            const usefulSpending = (corpoelecBill - corpoelecPenaltyUSD) + totalDieselCost;
+
+            // Update UI figures
+            document.getElementById('totalBleedAmount').innerText = formatCurrency(totalBleed);
+            document.getElementById('halfYearBleed').innerText = formatCurrency(totalBleed * 6);
+            
+            const estimatedOperationalCost = usefulSpending + totalBleed;
+            const bleedPercent = estimatedOperationalCost > 0 ? (totalBleed / estimatedOperationalCost * 100).toFixed(1) : 0;
+            document.getElementById('totalBleedPercent').innerText = `${bleedPercent}% del costo operativo mensual evaluado.`;
+
+            // Card values update
+            document.getElementById('valFP').innerText = powerFactor.toFixed(3);
+            document.getElementById('valCorpoelecPenalty').innerText = formatCurrency(corpoelecPenaltyUSD);
+            document.getElementById('valPenaltyPercent').innerText = `(Recargo del ${penaltyPercent.toFixed(1)}%)`;
+
+            document.getElementById('valDieselCost').innerText = formatCurrency(totalDieselCost);
+            document.getElementById('valTaxLoss').innerText = formatCurrency(nonDeductibleTaxLoss);
+
+            document.getElementById('valLucroCesante').innerText = formatCurrency(totalLucroCesante);
+            document.getElementById('valLossSpoilage').innerText = formatCurrency(lossSpoilage);
+            document.getElementById('valLossHours').innerText = `${outageHours} horas de paro`;
+
+            // Timestamp of audit execution
+            const now = new Date();
+            document.getElementById('auditTimestamp').innerText = `LOG: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+
+            // Render / update chart with APONWAONET colors
+            updateChart(usefulSpending, totalBleed, corpoelecPenaltyUSD, nonDeductibleTaxLoss, totalLucroCesante);
+        }
+
+        function updateChart(useful, waste, penalty, taxLoss, lucro) {
+            const ctx = document.getElementById('auditBarChart').getContext('2d');
+            
+            const chartData = {
+                labels: ['Gasto Operativo Útil', 'Ineficiencias y Pérdidas (Hemorragia)'],
+                datasets: [
+                    {
+                        label: 'Inversión Energética Útil',
+                        data: [useful, 0],
+                        backgroundColor: '#009a44', // aponwaoGreen
+                        borderColor: '#008282', // aponwaoTeal
+                        borderWidth: 1.5,
+                        borderRadius: 8
+                    },
+                    {
+                        label: 'Recargo Corpoelec (Bajo FP)',
+                        data: [0, penalty],
+                        backgroundColor: '#0062b8', // aponwaoBlue
+                        borderRadius: 8
+                    },
+                    {
+                        label: 'Gasto Fiscal Ineficiente (Prov. 0071)',
+                        data: [0, taxLoss],
+                        backgroundColor: '#008282', // aponwaoTeal
+                        borderRadius: 8
+                    },
+                    {
+                        label: 'Lucro Cesante Industrial (COVENIN)',
+                        data: [0, lucro],
+                        backgroundColor: '#ff3e3e', // neonRed
+                        borderRadius: 8
+                    }
+                ]
+            };
+
+            if (auditChartObj) {
+                auditChartObj.data = chartData;
+                auditChartObj.update();
+            } else {
+                auditChartObj = new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { color: '#16251f' },
+                                ticks: { color: '#cbd5e1', font: { size: 10 } }
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { color: '#16251f' },
+                                ticks: { color: '#cbd5e1', font: { size: 10 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: { color: '#cbd5e1', boxWidth: 10, font: { size: 9 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed.y !== null) {
+                                            label += formatCurrency(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function generateWhatsAppReport() {
+            const company = document.getElementById('companyName').value;
+            const rif = document.getElementById('companyRIF').value;
+            const totalBleed = document.getElementById('totalBleedAmount').innerText;
+            const halfYearBleed = document.getElementById('halfYearBleed').innerText;
+            const fp = document.getElementById('valFP').innerText;
+            const multa = document.getElementById('valCorpoelecPenalty').innerText;
+            const dieselCost = document.getElementById('valDieselCost').innerText;
+            const taxLoss = document.getElementById('valTaxLoss').innerText;
+            const lucro = document.getElementById('valLucroCesante').innerText;
+            const hours = document.getElementById('valLossHours').innerText;
+
+            const text = `📊 *APONWAONET // REPORTE DE VULNERABILIDAD ENERGÉTICA 2026* 📊\n\n` +
+                         `🏢 *Planta:* ${company}\n` +
+                         `📄 *RIF:* ${rif}\n\n` +
+                         `🔴 *HEMORRAGIA MENSUAL EVALUADA: ${totalBleed}*\n` +
+                         `📉 *Proyección de Fuga (Semestral):* ${halfYearBleed}\n\n` +
+                         `⚡ *FACTOR DE POTENCIA:* ${fp}\n` +
+                         `💸 *Multas Corpoelec calculadas:* ${multa}\n\n` +
+                         `⛽ *DIÉSEL INFORMAL (Sin Factura Prov. 0071):* ${dieselCost}\n` +
+                         `⚖️ *Impacto Fiscal (Pérdida ISLR 34%):* ${taxLoss}\n\n` +
+                         `⚙️ *LUCRO CESANTE (COVENIN 159):* ${lucro}\n` +
+                         `⏱️ *Fallas de Red / Paradas:* ${hours}\n\n` +
+                         `🚧 *Propuesta APONWAONET:* Corrección activa del FP e inicio de transición a autogeneración solar híbrida inteligente. Reporte detallado generado en PDF.`;
+
+            const encodedText = encodeURIComponent(text);
+            const waUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+            window.open(waUrl, '_blank');
+            showToast('Generando plantilla de envío en WhatsApp...');
+        }
+
+        function generateProfessionalPDF() {
+            showToast('Compilando informe de hallazgos...');
+
+            const company = document.getElementById('companyName').value;
+            const rif = document.getElementById('companyRIF').value;
+            const totalBleed = document.getElementById('totalBleedAmount').innerText;
+            const fp = document.getElementById('valFP').innerText;
+            const multa = document.getElementById('valCorpoelecPenalty').innerText;
+            const dieselCost = document.getElementById('valDieselCost').innerText;
+            const taxLoss = document.getElementById('valTaxLoss').innerText;
+            const lucro = document.getElementById('valLucroCesante').innerText;
+            const hours = document.getElementById('valLossHours').innerText;
+
+            const numericBleed = parseFloat(totalBleed.replace(/[^0-9.-]+/g,"")) || 0;
+            const annualBleed = numericBleed * 12;
+
+            // Map data to the DOM
+            document.getElementById('pdfCompanyName').innerText = company;
+            document.getElementById('pdfCompanyRIF').innerText = `RIF: ${rif}`;
+            document.getElementById('pdfTotalBleed').innerText = totalBleed;
+            document.getElementById('pdfAnnualBleed').innerText = `Anualizado: ${formatCurrency(annualBleed)} / año`;
+            document.getElementById('pdfDate').innerText = `Auditado el: ${new Date().toLocaleDateString()}`;
+
+            document.getElementById('pdfValFP').innerText = fp;
+            document.getElementById('pdfValMulta').innerText = multa;
+
+            document.getElementById('pdfValCombustible').innerText = dieselCost;
+            document.getElementById('pdfValTaxLoss').innerText = taxLoss;
+
+            document.getElementById('pdfValLucro').innerText = lucro;
+            document.getElementById('pdfValHours').innerText = hours;
+
+            // Target the wrapper and template safely
+            const wrapper = document.getElementById('pdfWrapper');
+            const element = document.getElementById('pdfTemplate');
+
+            // Temporarily optimize styles so html2canvas measures physical bounding box correctly
+            wrapper.style.position = 'absolute';
+            wrapper.style.left = '0px';
+            wrapper.style.top = '0px';
+            wrapper.style.width = '800px';
+            wrapper.style.height = 'auto';
+            wrapper.style.overflow = 'visible';
+
+            const opt = {
+                margin:       [12, 12, 12, 12],
+                filename:     `Auditoria_Aponwaonet_${company.replace(/\s+/g, '_')}_2026.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: false, // Set to false to prevent cross-origin canvas pollution of external fonts/icons
+                    logging: false,
+                    scrollY: 0,
+                    scrollX: 0
+                },
+                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Execute rendering promise loop
+            html2pdf().from(element).set(opt).save().then(() => {
+                // Restore element encapsulation safely
+                wrapper.style.position = 'fixed';
+                wrapper.style.left = '-9999px';
+                wrapper.style.top = '-9999px';
+                wrapper.style.width = '0px';
+                wrapper.style.height = '0px';
+                wrapper.style.overflow = 'hidden';
+                showToast('¡Descarga de PDF de Auditoría iniciada!');
+            }).catch(err => {
+                console.error("Error generating PDF:", err);
+                // Fallback encapsulation restore on error
+                wrapper.style.position = 'fixed';
+                wrapper.style.left = '-9999px';
+                wrapper.style.top = '-9999px';
+                wrapper.style.width = '0px';
+                wrapper.style.height = '0px';
+                wrapper.style.overflow = 'hidden';
+                showToast('Error al compilar PDF.', true);
+            });
+        }
+    </script>
+</body>
+</html>
